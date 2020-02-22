@@ -5,8 +5,8 @@ namespace BinaryObjectMapper.lib
     /// <summary>
     /// Test attribute
     /// </summary>
-    [AttributeUsage(AttributeTargets.Field)]
-    public class TestAttribute:
+    [AttributeUsage(AttributeTargets.Class|AttributeTargets.Struct)]
+    public class ObjectModelAttribute:
         Attribute
     {
     }
