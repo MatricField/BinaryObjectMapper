@@ -1,5 +1,5 @@
 [<System.CLSCompliant(false)>]
-module BinaryObjectMapper2.FSharp.Mapping
+module BinaryObjectMapper.FSharp.Mapping
 
 open Microsoft.CodeAnalysis.CSharp
 open Microsoft.CodeAnalysis.CSharp.Syntax

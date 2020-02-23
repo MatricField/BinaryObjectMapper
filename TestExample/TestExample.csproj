@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BinaryObjectMapper2\BinaryObjectMapper2.fsproj" />
+    <ProjectReference Include="..\BinaryObjectMapper\BinaryObjectMapper.fsproj" />
   </ItemGroup>
 
 </Project>

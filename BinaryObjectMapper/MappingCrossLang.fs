@@ -1,6 +1,6 @@
-module BinaryObjectMapper2.Mapping
+module BinaryObjectMapper.Mapping
 
-open BinaryObjectMapper2.FSharp.Mapping
+open BinaryObjectMapper.FSharp.Mapping
 open Microsoft.CodeAnalysis
 
 let ProcessTree (syntaxTree: SyntaxTree) =

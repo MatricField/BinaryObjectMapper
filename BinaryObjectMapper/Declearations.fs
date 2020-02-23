@@ -1,4 +1,4 @@
-namespace BinaryObjectMapper2
+namespace BinaryObjectMapper
 
 open System
 open System.IO

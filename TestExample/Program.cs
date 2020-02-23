@@ -13,7 +13,7 @@ namespace TestExample
 
             var tree = CSharpSyntaxTree.ParseText(
                 @"namespace TestN { [MappableTypeAttribute]class TestC {} class TestA{}} [MappableTypeAttribute]class TestB{} class TestD{}");
-            var ns = BinaryObjectMapper2.Mapping.ProcessTree(tree);
+            var ns = BinaryObjectMapper.Mapping.ProcessTree(tree);
             Console.WriteLine(ns.GetRoot().NormalizeWhitespace().ToString());
         }
     }

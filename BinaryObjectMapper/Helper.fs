@@ -1,4 +1,4 @@
-namespace BinaryObjectMapper2.Helper
+namespace BinaryObjectMapper.Helper
 
 type internal OptionBuilder() =
     member inline _.Bind(m, f) = 
