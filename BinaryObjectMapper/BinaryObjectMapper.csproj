@@ -5,12 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fody" Version="6.0.3" PrivateAssets="none" />
-    <PackageReference Include="FodyPackaging" Version="6.0.3" PrivateAssets="All" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\BinaryObjectMapper.Fody\BinaryObjectMapper.Fody.csproj" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.4.0" />
   </ItemGroup>
 
 </Project>
