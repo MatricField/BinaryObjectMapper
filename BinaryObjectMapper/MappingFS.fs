@@ -1,10 +1,10 @@
-[<System.CLSCompliant(false)>]
 module BinaryObjectMapper.FSharp.Mapping
 
 open Microsoft.CodeAnalysis.CSharp
 open Microsoft.CodeAnalysis.CSharp.Syntax
 open Microsoft.CodeAnalysis
 open System
+open System.IO
 
 module private Common =
 
@@ -16,12 +16,27 @@ module private Common =
         |>SyntaxFactory.SingletonSeparatedList
         |>SyntaxFactory.BaseList
 
+    let compilerGenerated = 
+        "CompilerGenerated"
+        |>SyntaxFactory.ParseName
+        |>SyntaxFactory.Attribute
+        |>SyntaxFactory.SingletonSeparatedList
+        |>SyntaxFactory.AttributeList
+
+    let usings =
+        seq{
+            "System.Runtime.CompilerServices"
+            "BinaryObjectMapper"
+        }
+        |>Seq.map (SyntaxFactory.ParseName>>SyntaxFactory.UsingDirective)
+        |>Seq.toArray
+
     let inline toMember x : MemberDeclarationSyntax = x
 
 let rec processClass (``class``: ClassDeclarationSyntax) =
     let hasAttr (``class``: ClassDeclarationSyntax) =
         ``class``.AttributeLists
-        |>Seq.exists (fun x -> x.Attributes |> Seq.exists (fun attr -> (string attr.Name) = "MappableTypeAttribute"))
+        |>Seq.exists (fun x -> x.Attributes |> Seq.exists (fun attr -> (string attr.Name) = "MappableTypeAttribute" || (string attr.Name) = "MappableType"))
 
     if hasAttr ``class`` then
         let subtypes =
@@ -31,6 +46,7 @@ let rec processClass (``class``: ClassDeclarationSyntax) =
         SyntaxFactory
             .ClassDeclaration(``class``.Identifier)
             .WithModifiers(``class``.Modifiers)
+            .AddAttributeLists(Common.compilerGenerated)
             .WithBaseList(Common.baseList)
             .AddMembers(subtypes)
         |>Some
@@ -59,19 +75,51 @@ and tryProcessMember (``member`` : SyntaxNode) =
         |>Option.map Common.toMember
     | _ -> None
 
-let processTree (syntaxTree: SyntaxTree) =
-    match syntaxTree.GetRoot() with
+let processNode (syntaxNode: SyntaxNode) =
+    match syntaxNode with
     | :? CompilationUnitSyntax as compUnit ->
         let newMember =
             compUnit.Members
             |>Seq.choose tryProcessMember
             |>Seq.toArray
-        SyntaxFactory
-            .CompilationUnit()
-            .AddMembers(newMember)
-        |>SyntaxFactory.SyntaxTree
-        |>Some
+        if Seq.isEmpty newMember  then
+            None
+        else
+            SyntaxFactory
+                .CompilationUnit()
+                .AddMembers(newMember)
+                .AddUsings(Common.usings)
+            :>SyntaxNode
+            |>Some
     |root ->
         root 
         |>tryProcessMember
-        |> Option.map SyntaxFactory.SyntaxTree
+        |>Option.map (fun x -> x:>SyntaxNode)
+
+    |>Option.map (fun x -> x.NormalizeWhitespace())
+
+let processProject (proj:Project) =
+    let processFile (oldProj:Project) (id:DocumentId) =
+        let document = oldProj.GetDocument id
+        let node =
+            document.GetSyntaxRootAsync()
+            |>Async.AwaitTask
+            |>Async.RunSynchronously
+        match processNode node with
+        |None -> oldProj
+        |Some newNode ->
+            let newName =
+                (Path.GetFileNameWithoutExtension document.Name) + ".g.cs"
+            match
+                oldProj.Documents
+                |>Seq.filter (fun doc -> doc.Name = newName)
+                |>Seq.tryHead
+                with
+                | None ->
+                    oldProj.AddDocument(newName, newNode).Project
+                | Some doc ->
+                    doc.WithSyntaxRoot(newNode).Project
+    let mutable newP = proj
+    for i in proj.DocumentIds do
+        newP <- processFile newP i
+    newP
