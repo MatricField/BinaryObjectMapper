@@ -7,6 +7,9 @@ open System
 open System.IO
 
 module private Common =
+    let mappableTypeAttribute =
+        SyntaxFactory.ParseName "MappableType"
+        |>SyntaxFactory.Attribute
 
     let baseList =
         "IMappableType"
@@ -25,6 +28,7 @@ module private Common =
 
     let usings =
         seq{
+            "System.IO"
             "System.Runtime.CompilerServices"
             "BinaryObjectMapper"
         }
@@ -33,22 +37,28 @@ module private Common =
 
     let inline toMember x : MemberDeclarationSyntax = x
 
+let injectMethod (def: ClassDeclarationSyntax) (impl:ClassDeclarationSyntax) =
+    impl
+
 let rec processClass (``class``: ClassDeclarationSyntax) =
     let hasAttr (``class``: ClassDeclarationSyntax) =
         ``class``.AttributeLists
-        |>Seq.exists (fun x -> x.Attributes |> Seq.exists (fun attr -> (string attr.Name) = "MappableTypeAttribute" || (string attr.Name) = "MappableType"))
+        //|>Seq.exists (fun x -> x.Attributes |> Seq.exists (fun attr -> (string attr.Name) = "MappableTypeAttribute" || (string attr.Name) = "MappableType"))
+        |>Seq.exists (fun x -> x.Attributes |> Seq.exists (fun attr -> SyntaxFactory.AreEquivalent(Common.mappableTypeAttribute, attr)))
 
     if hasAttr ``class`` then
         let subtypes =
             ``class``.Members
             |>Seq.choose tryProcessMember
             |>Seq.toArray
-        SyntaxFactory
-            .ClassDeclaration(``class``.Identifier)
-            .WithModifiers(``class``.Modifiers)
-            .AddAttributeLists(Common.compilerGenerated)
-            .WithBaseList(Common.baseList)
-            .AddMembers(subtypes)
+        let generatedClass =
+            SyntaxFactory
+                .ClassDeclaration(``class``.Identifier)
+                .WithModifiers(``class``.Modifiers)
+                .AddAttributeLists(Common.compilerGenerated)
+                .WithBaseList(Common.baseList)
+                .AddMembers(subtypes)
+        injectMethod ``class`` generatedClass
         |>Some
     else
         None
