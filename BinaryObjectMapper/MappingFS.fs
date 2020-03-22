@@ -35,10 +35,60 @@ module private Common =
         |>Seq.map (SyntaxFactory.ParseName>>SyntaxFactory.UsingDirective)
         |>Seq.toArray
 
+
+    let serializeText ="""
+    public void Serialize(BinaryWriter writer)
+    {
+
+    }
+    """
+
+    let deserializeText ="""
+    public void Deserialize(BinaryReader reader)
+    {
+
+    }
+    """
+
     let inline toMember x : MemberDeclarationSyntax = x
 
+let generateRead (field: FieldDeclarationSyntax) =
+    let generateStatement =
+        let statement rhs id =
+            SyntaxFactory.AssignmentExpression(
+                SyntaxKind.SimpleAssignmentExpression,
+                id,
+                rhs)
+            |>SyntaxFactory.ExpressionStatement
+            :>StatementSyntax
+        match field.Declaration.Type.ToString() with
+        |"byte" -> statement (SyntaxFactory.ParseExpression("reader.ReadByte()"))
+        |"short" -> statement (SyntaxFactory.ParseExpression("reader.ReadInt16()"))
+        |"int" -> statement (SyntaxFactory.ParseExpression("reader.ReadInt32()"))
+        |"double" -> statement (SyntaxFactory.ParseExpression("reader.ReadDouble()"))
+        |_ -> raise(NotImplementedException())
+    field.Declaration.Variables
+    |>Seq.map (fun v -> generateStatement (SyntaxFactory.IdentifierName v.Identifier))
+
 let injectMethod (def: ClassDeclarationSyntax) (impl:ClassDeclarationSyntax) =
+    let fields =
+        def.Members
+        |>Seq.choose (function | :? FieldDeclarationSyntax as f -> Some f | _ -> None)
+        |>Seq.toList
+
+    let readMethod =
+        let reads =
+            fields
+            |>Seq.collect generateRead
+            |> Seq.toArray
+        let method =
+            (SyntaxFactory.ParseMemberDeclaration Common.deserializeText) :?> MethodDeclarationSyntax
+        method.AddBodyStatements(reads)
+
+    let writeMethod =
+        SyntaxFactory.ParseMemberDeclaration Common.serializeText
     impl
+        .AddMembers(readMethod, writeMethod)
 
 let rec processClass (``class``: ClassDeclarationSyntax) =
     let hasAttr (``class``: ClassDeclarationSyntax) =

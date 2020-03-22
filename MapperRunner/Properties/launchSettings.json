@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MapperRunner": {
+      "commandName": "Project",
+      "commandLineArgs": "D:\\Users\\david\\Documents\\Source\\Repos\\MatricField\\BinaryObjectMapper\\TestExample\\TestExample.csproj"
+    }
+  }
+}
