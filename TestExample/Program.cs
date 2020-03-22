@@ -8,7 +8,8 @@ namespace TestExample
     [MappableType]
     partial class Test
     {
-
+        private int field1;
+        private double field2;
     }
 
     class Program

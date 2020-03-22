@@ -6,6 +6,9 @@
   <ItemGroup>
     <ProjectReference Include="..\BinaryObjectMapper\BinaryObjectMapper.fsproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.g.cs" />
+  </ItemGroup>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="$(SolutionDir)MapperRunner\bin\Debug\netcoreapp3.1\MapperRunner.exe $(ProjectPath)" />
   </Target>

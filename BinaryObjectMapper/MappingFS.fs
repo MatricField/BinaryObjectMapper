@@ -7,6 +7,9 @@ open System
 open System.IO
 
 module private Common =
+    let mappableTypeAttribute =
+        SyntaxFactory.ParseName "MappableType"
+        |>SyntaxFactory.Attribute
 
     let baseList =
         "IMappableType"
@@ -25,30 +28,97 @@ module private Common =
 
     let usings =
         seq{
+            "System.IO"
             "System.Runtime.CompilerServices"
             "BinaryObjectMapper"
         }
         |>Seq.map (SyntaxFactory.ParseName>>SyntaxFactory.UsingDirective)
         |>Seq.toArray
 
+
+    let serializeText ="""
+    public void Serialize(BinaryWriter writer)
+    {
+
+    }
+    """
+
+    let deserializeText ="""
+    public void Deserialize(BinaryReader reader)
+    {
+
+    }
+    """
+
     let inline toMember x : MemberDeclarationSyntax = x
+
+let generateRead (field: FieldDeclarationSyntax) =
+    let generateStatement =
+        let statement rhs id =
+            SyntaxFactory.AssignmentExpression(
+                SyntaxKind.SimpleAssignmentExpression,
+                id,
+                rhs)
+            |>SyntaxFactory.ExpressionStatement
+            :>StatementSyntax
+        match field.Declaration.Type.ToString() with
+        |"byte" -> statement (SyntaxFactory.ParseExpression("reader.ReadByte()"))
+        |"short" -> statement (SyntaxFactory.ParseExpression("reader.ReadInt16()"))
+        |"int" -> statement (SyntaxFactory.ParseExpression("reader.ReadInt32()"))
+        |"double" -> statement (SyntaxFactory.ParseExpression("reader.ReadDouble()"))
+        |_ -> raise(NotImplementedException())
+    field.Declaration.Variables
+    |>Seq.map (fun v -> generateStatement (SyntaxFactory.IdentifierName v.Identifier))
+
+let generateWrite (field: FieldDeclarationSyntax) =
+    field.Declaration.Variables
+    |>Seq.map (fun v -> SyntaxFactory.ParseStatement("writer.Write("+v.Identifier.ToString()+");"))
+
+let injectMethod (def: ClassDeclarationSyntax) (impl:ClassDeclarationSyntax) =
+    let fields =
+        def.Members
+        |>Seq.choose (function | :? FieldDeclarationSyntax as f -> Some f | _ -> None)
+        |>Seq.toList
+
+    let readMethod =
+        let reads =
+            fields
+            |>Seq.collect generateRead
+            |>Seq.toArray
+        let method =
+            (SyntaxFactory.ParseMemberDeclaration Common.deserializeText) :?> MethodDeclarationSyntax
+        method.AddBodyStatements(reads)
+
+    let writeMethod =
+        let writes =
+            fields
+            |>Seq.collect generateWrite
+            |>Seq.toArray
+        let method =
+            (SyntaxFactory.ParseMemberDeclaration Common.serializeText) :?> MethodDeclarationSyntax
+        method.AddBodyStatements(writes)
+    
+    impl.AddMembers(readMethod, writeMethod)
 
 let rec processClass (``class``: ClassDeclarationSyntax) =
     let hasAttr (``class``: ClassDeclarationSyntax) =
         ``class``.AttributeLists
-        |>Seq.exists (fun x -> x.Attributes |> Seq.exists (fun attr -> (string attr.Name) = "MappableTypeAttribute" || (string attr.Name) = "MappableType"))
+        //|>Seq.exists (fun x -> x.Attributes |> Seq.exists (fun attr -> (string attr.Name) = "MappableTypeAttribute" || (string attr.Name) = "MappableType"))
+        |>Seq.exists (fun x -> x.Attributes |> Seq.exists (fun attr -> SyntaxFactory.AreEquivalent(Common.mappableTypeAttribute, attr)))
 
     if hasAttr ``class`` then
         let subtypes =
             ``class``.Members
             |>Seq.choose tryProcessMember
             |>Seq.toArray
-        SyntaxFactory
-            .ClassDeclaration(``class``.Identifier)
-            .WithModifiers(``class``.Modifiers)
-            .AddAttributeLists(Common.compilerGenerated)
-            .WithBaseList(Common.baseList)
-            .AddMembers(subtypes)
+        let generatedClass =
+            SyntaxFactory
+                .ClassDeclaration(``class``.Identifier)
+                .WithModifiers(``class``.Modifiers)
+                .AddAttributeLists(Common.compilerGenerated)
+                .WithBaseList(Common.baseList)
+                .AddMembers(subtypes)
+        injectMethod ``class`` generatedClass
         |>Some
     else
         None
