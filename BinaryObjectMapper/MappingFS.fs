@@ -70,6 +70,10 @@ let generateRead (field: FieldDeclarationSyntax) =
     field.Declaration.Variables
     |>Seq.map (fun v -> generateStatement (SyntaxFactory.IdentifierName v.Identifier))
 
+let generateWrite (field: FieldDeclarationSyntax) =
+    field.Declaration.Variables
+    |>Seq.map (fun v -> SyntaxFactory.ParseStatement("writer.Write("+v.Identifier.ToString()+");"))
+
 let injectMethod (def: ClassDeclarationSyntax) (impl:ClassDeclarationSyntax) =
     let fields =
         def.Members
@@ -80,15 +84,21 @@ let injectMethod (def: ClassDeclarationSyntax) (impl:ClassDeclarationSyntax) =
         let reads =
             fields
             |>Seq.collect generateRead
-            |> Seq.toArray
+            |>Seq.toArray
         let method =
             (SyntaxFactory.ParseMemberDeclaration Common.deserializeText) :?> MethodDeclarationSyntax
         method.AddBodyStatements(reads)
 
     let writeMethod =
-        SyntaxFactory.ParseMemberDeclaration Common.serializeText
-    impl
-        .AddMembers(readMethod, writeMethod)
+        let writes =
+            fields
+            |>Seq.collect generateWrite
+            |>Seq.toArray
+        let method =
+            (SyntaxFactory.ParseMemberDeclaration Common.serializeText) :?> MethodDeclarationSyntax
+        method.AddBodyStatements(writes)
+    
+    impl.AddMembers(readMethod, writeMethod)
 
 let rec processClass (``class``: ClassDeclarationSyntax) =
     let hasAttr (``class``: ClassDeclarationSyntax) =

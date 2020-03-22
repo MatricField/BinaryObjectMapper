@@ -15,6 +15,8 @@ namespace TestExample
 
         public void Serialize(BinaryWriter writer)
         {
+            writer.Write(field1);
+            writer.Write(field2);
         }
     }
 }
