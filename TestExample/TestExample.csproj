@@ -1,19 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BinaryObjectMapper\BinaryObjectMapper.fsproj" />
+    <ProjectReference Include="..\BinaryObjectMapper.Declarations\BinaryObjectMapper.Declarations.csproj" />
+    <ProjectReference Include="..\BinaryObjectMapper\BinaryObjectMapper.fsproj">
+      <OutputItemType>Analyzer</OutputItemType>
+    </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Program.g.cs" />
-  </ItemGroup>
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="$(SolutionDir)MapperRunner\bin\Debug\netcoreapp3.1\MapperRunner.exe $(ProjectPath)" />
-  </Target>
-  <!--<UsingTask TaskName="MapperRunner.CodeGenerationTask" AssemblyFile="..\MapperRunner\bin\Debug\netcoreapp3.1\MapperRunner.dll" />
-  <Target Name="Custom" BeforeTargets="Build">
-    <CodeGenerationTask CSProjPath="'$(ProjectPath)'" />
-  </Target>-->
 </Project>
