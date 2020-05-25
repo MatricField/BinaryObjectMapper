@@ -5,9 +5,9 @@ VisualStudioVersion = 16.0.29318.209
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestExample", "TestExample\TestExample.csproj", "{F370E692-98F7-4505-A1A3-9555429ED995}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "BinaryObjectMapper", "BinaryObjectMapper\BinaryObjectMapper.fsproj", "{9DC1A53E-9C9B-4296-B1D9-BD1E2E797681}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinaryObjectMapper.Declarations", "BinaryObjectMapper.Declarations\BinaryObjectMapper.Declarations.csproj", "{B43E7AF4-893B-4F44-B4F5-38CFF4C0C72C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryObjectMapper.Declarations", "BinaryObjectMapper.Declarations\BinaryObjectMapper.Declarations.csproj", "{B43E7AF4-893B-4F44-B4F5-38CFF4C0C72C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryObjectMapper", "BinaryObjectMapper\BinaryObjectMapper.csproj", "{1574E670-EAAF-4614-BFD3-C6EA02084E1F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,14 +19,14 @@ Global
 		{F370E692-98F7-4505-A1A3-9555429ED995}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F370E692-98F7-4505-A1A3-9555429ED995}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F370E692-98F7-4505-A1A3-9555429ED995}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9DC1A53E-9C9B-4296-B1D9-BD1E2E797681}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9DC1A53E-9C9B-4296-B1D9-BD1E2E797681}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9DC1A53E-9C9B-4296-B1D9-BD1E2E797681}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9DC1A53E-9C9B-4296-B1D9-BD1E2E797681}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B43E7AF4-893B-4F44-B4F5-38CFF4C0C72C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B43E7AF4-893B-4F44-B4F5-38CFF4C0C72C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B43E7AF4-893B-4F44-B4F5-38CFF4C0C72C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B43E7AF4-893B-4F44-B4F5-38CFF4C0C72C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1574E670-EAAF-4614-BFD3-C6EA02084E1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1574E670-EAAF-4614-BFD3-C6EA02084E1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1574E670-EAAF-4614-BFD3-C6EA02084E1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1574E670-EAAF-4614-BFD3-C6EA02084E1F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

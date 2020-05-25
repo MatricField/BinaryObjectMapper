@@ -1,9 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <Sdk Name="CodeGeneration.Roslyn.Plugin.Sdk" Version="0.7.63" />
+  
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Nullable>Enable</Nullable>
   </PropertyGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\BinaryObjectMapper.Declarations\BinaryObjectMapper.Declarations.csproj" />
   </ItemGroup>
+
 </Project>
